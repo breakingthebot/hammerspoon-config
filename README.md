@@ -1,5 +1,7 @@
 # hammerspoon-config
 
+[![Tests](https://github.com/breakingthebot/hammerspoon-config/actions/workflows/test.yml/badge.svg)](https://github.com/breakingthebot/hammerspoon-config/actions/workflows/test.yml)
+
 Personal Hammerspoon automation for macOS — hotkey-driven window snapping, multi-monitor support, and an app launcher.
 
 ## Stack
@@ -42,6 +44,13 @@ None required.
 
 ## Deployed
 N/A — this is a local automation tool, not a hosted app.
+
+## Running Tests
+```bash
+lua tests/test_window_manager.lua
+lua tests/test_app_launcher.lua
+```
+Both suites run automatically on every push/PR via GitHub Actions (`.github/workflows/test.yml`) — see the badge at the top of this file.
 
 ## Architecture Notes
 The window-geometry math (`src/window_manager.lua`) is written as pure functions that take a screen frame and a layout name and return a rectangle — no Hammerspoon API calls inside that calculation. A thin `apply()` wrapper is the only part that touches the real `hs.window` object. This split means the layout math can be unit tested with a plain Lua interpreter, without Hammerspoon installed, which matters here because Hammerspoon only runs on macOS.

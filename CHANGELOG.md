@@ -4,6 +4,11 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-07-05
+### Added
+- GitHub Actions CI (`.github/workflows/test.yml`) — installs Lua and runs both test suites on every push/PR to `main`.
+- Tests badge in README.
+
 ## [0.2.0] - 2026-07-05
 ### Added
 - Multi-monitor support: `alt+ctrl+]` / `alt+ctrl+[` move the focused window to the next/previous screen, preserving its relative position and size (`translateFrame`, `nextScreenIndex`, `moveToScreen` in `src/window_manager.lua`).
