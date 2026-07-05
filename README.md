@@ -1,6 +1,6 @@
 # hammerspoon-config
 
-Personal Hammerspoon automation for macOS — hotkey-driven window snapping and an app launcher.
+Personal Hammerspoon automation for macOS — hotkey-driven window snapping, multi-monitor support, and an app launcher.
 
 ## Stack
 - Lua (Hammerspoon's embedded scripting language)
@@ -24,7 +24,7 @@ None required.
 2. An on-screen alert reading "Hammerspoon config loaded" confirms it picked up the config.
 3. Try the hotkeys listed below.
 
-### Hotkeys (iteration 1 defaults, see `config/hotkeys.lua`)
+### Hotkeys (see `config/hotkeys.lua`)
 
 | Hotkey | Action |
 | --- | --- |
@@ -34,6 +34,8 @@ None required.
 | `alt+ctrl+down` | Snap focused window to bottom half |
 | `alt+ctrl+m` | Maximize focused window |
 | `alt+ctrl+c` | Center focused window at 80% of screen size |
+| `alt+ctrl+]` | Move focused window to the next screen, preserving relative size/position |
+| `alt+ctrl+[` | Move focused window to the previous screen, preserving relative size/position |
 | `alt+ctrl+shift+t` | Focus/launch Terminal (hide if already frontmost) |
 | `alt+ctrl+shift+b` | Focus/launch Safari (hide if already frontmost) |
 | `alt+ctrl+shift+e` | Focus/launch Visual Studio Code (hide if already frontmost) |
@@ -47,6 +49,8 @@ The window-geometry math (`src/window_manager.lua`) is written as pure functions
 `src/app_launcher.lua` follows the same idea: the logic branches on the state Hammerspoon reports (`isFrontmost`, whether the app is running at all) rather than hardcoding assumptions, and tests mock the `hs.application` calls to exercise all three branches (not running, running-but-background, running-and-frontmost).
 
 `config/hotkeys.lua` is the single place that defines keybindings and the app list, so rebinding a key or adding an app never requires touching logic code in `src/` or `init.lua`.
+
+Multi-monitor support (`translateFrame`, `nextScreenIndex`, `moveToScreen` in `src/window_manager.lua`) follows the same pure-function-plus-thin-wrapper split. `translateFrame` re-expresses a window's frame as a proportion of its current screen and reapplies that proportion to a target screen, so a half-screen window stays roughly half-screen after moving to a monitor with a different resolution or DPI. `nextScreenIndex` is the 1-based wraparound math for cycling through however many screens are connected. Both are pure and unit tested; only `moveToScreen` touches real `hs.screen`/`hs.window` objects.
 
 ## Notes
 - Hammerspoon is macOS-only. This project was developed and unit-tested on Windows using a standalone Lua interpreter for the pure-logic pieces; the window-snapping and app-launching behavior itself has not been exercised inside actual Hammerspoon/macOS yet — verify hotkeys work as expected on your Mac after installing.

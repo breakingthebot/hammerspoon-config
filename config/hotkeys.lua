@@ -15,6 +15,13 @@ return {
     { key = "c",     mode = "center" },
   },
 
+  -- Move the focused window to the next/previous display, preserving its
+  -- relative position and size. No-op on a single-monitor setup.
+  screens = {
+    { key = "]", direction = 1 },
+    { key = "[", direction = -1 },
+  },
+
   -- App launcher uses its own modifier so it never collides with window keys.
   appModifier = { "alt", "ctrl", "shift" },
 

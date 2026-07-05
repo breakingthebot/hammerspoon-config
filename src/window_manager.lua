@@ -45,4 +45,67 @@ function M.apply(win, mode)
   return true
 end
 
+-- translateFrame(frame, fromScreen, toScreen) -> {x, y, w, h}
+-- Re-expresses `frame` (given relative to `fromScreen`) as the equivalent
+-- frame on `toScreen`, preserving position/size as a proportion of the
+-- screen. This keeps a window's relative layout intact when it moves to a
+-- monitor with a different resolution or DPI.
+function M.translateFrame(frame, fromScreen, toScreen)
+  local relX = (frame.x - fromScreen.x) / fromScreen.w
+  local relY = (frame.y - fromScreen.y) / fromScreen.h
+  local relW = frame.w / fromScreen.w
+  local relH = frame.h / fromScreen.h
+
+  return {
+    x = toScreen.x + relX * toScreen.w,
+    y = toScreen.y + relY * toScreen.h,
+    w = relW * toScreen.w,
+    h = relH * toScreen.h,
+  }
+end
+
+-- nextScreenIndex(currentIndex, count, direction) -> integer
+-- 1-based wraparound index into a screen list. direction = 1 (next) or -1 (previous).
+-- Pure function so the wraparound math can be tested without real hs.screen objects.
+function M.nextScreenIndex(currentIndex, count, direction)
+  if count <= 0 then
+    error("window_manager.nextScreenIndex: count must be positive")
+  end
+  direction = direction or 1
+  local zeroBased = (currentIndex - 1 + direction) % count
+  return zeroBased + 1
+end
+
+-- moveToScreen(win, direction) -> boolean success
+-- Moves the focused window to the next (direction = 1) or previous
+-- (direction = -1) screen, preserving its relative position/size.
+function M.moveToScreen(win, direction)
+  if not win then
+    return false
+  end
+
+  local screens = hs.screen.allScreens()
+  if #screens < 2 then
+    return false
+  end
+
+  local currentScreen = win:screen()
+  local currentIndex
+  for i, screen in ipairs(screens) do
+    if screen:id() == currentScreen:id() then
+      currentIndex = i
+      break
+    end
+  end
+  if not currentIndex then
+    return false
+  end
+
+  local targetIndex = M.nextScreenIndex(currentIndex, #screens, direction)
+  local targetScreen = screens[targetIndex]
+  local newFrame = M.translateFrame(win:frame(), currentScreen:frame(), targetScreen:frame())
+  win:setFrame(newFrame)
+  return true
+end
+
 return M

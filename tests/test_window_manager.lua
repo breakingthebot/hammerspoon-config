@@ -29,4 +29,32 @@ local ok = pcall(windowManager.calculateFrame, screen, "not-a-real-mode")
 assert(not ok, "expected calculateFrame to error on an unknown mode")
 passed = passed + 1
 
+-- translateFrame: re-express a frame relative to a different screen,
+-- including screens of a different resolution (simulates crossing monitors).
+local fromScreen = { x = 0, y = 0, w = 1000, h = 800 }
+local toScreenSameRes = { x = 1000, y = 0, w = 1000, h = 800 }
+local leftHalfFrame = windowManager.calculateFrame(fromScreen, "left-half")
+local translated = windowManager.translateFrame(leftHalfFrame, fromScreen, toScreenSameRes)
+assert(translated.x == 1000 and translated.y == 0 and translated.w == 500 and translated.h == 800,
+  "translateFrame: expected left-half to land at the same relative spot on an identical same-resolution screen")
+passed = passed + 1
+
+local toScreenDifferentRes = { x = 0, y = 800, w = 1200, h = 900 }
+local centerFrame = windowManager.calculateFrame(fromScreen, "center")
+local translatedDifferentRes = windowManager.translateFrame(centerFrame, fromScreen, toScreenDifferentRes)
+assert(translatedDifferentRes.x == 120 and translatedDifferentRes.y == 890
+  and translatedDifferentRes.w == 960 and translatedDifferentRes.h == 720,
+  "translateFrame: expected proportions preserved when moving to a different-resolution screen")
+passed = passed + 1
+
+-- nextScreenIndex: 1-based wraparound in both directions.
+assert(windowManager.nextScreenIndex(1, 3, 1) == 2, "nextScreenIndex: expected 1 -> 2 going forward")
+passed = passed + 1
+assert(windowManager.nextScreenIndex(3, 3, 1) == 1, "nextScreenIndex: expected wraparound 3 -> 1 going forward")
+passed = passed + 1
+assert(windowManager.nextScreenIndex(1, 3, -1) == 3, "nextScreenIndex: expected wraparound 1 -> 3 going backward")
+passed = passed + 1
+assert(windowManager.nextScreenIndex(2, 3, -1) == 1, "nextScreenIndex: expected 2 -> 1 going backward")
+passed = passed + 1
+
 print(string.format("test_window_manager: %d assertions passed", passed))

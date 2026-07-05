@@ -16,6 +16,13 @@ for _, binding in ipairs(hotkeys.window) do
   end)
 end
 
+for _, binding in ipairs(hotkeys.screens) do
+  hs.hotkey.bind(hotkeys.modifier, binding.key, function()
+    local win = hs.window.focusedWindow()
+    windowManager.moveToScreen(win, binding.direction)
+  end)
+end
+
 for _, app in ipairs(hotkeys.apps) do
   hs.hotkey.bind(hotkeys.appModifier, app.key, function()
     appLauncher.focusOrLaunch(app.name)
